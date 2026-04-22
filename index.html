@@ -1669,10 +1669,17 @@ function closeModal() {
 function closeModalOutside(e) {
   if(e.target===document.getElementById('modal')) closeModal();
 }
-function submitModal() {
+async function submitModal() {
   const name = document.getElementById('m-name').value.trim();
   const email = document.getElementById('m-email').value.trim();
   if(!name || !email) { alert('Merci de remplir ton prénom et ton email 🙏'); return; }
+  try {
+    await fetch('https://api.brevo.com/v3/contacts', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','api-key':'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'},
+      body: JSON.stringify({email:email,attributes:{PRENOM:name},listIds:[2],updateEnabled:true})
+    });
+  } catch(e) { console.log(e); }
   document.getElementById('modal-form-view').style.display='none';
   document.getElementById('modal-success-view').style.display='block';
 }

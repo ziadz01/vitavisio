@@ -1349,13 +1349,13 @@ footer {
 <div id="modal-form-view">
   <h2>Rejoins la<br>liste d'attente ✦</h2>
   <p>Les 500 premiers inscrits reçoivent un accès bêta gratuit + 3 mois offerts sur le plan Mensuel. Sans CB, sans engagement.</p>
-  <iframe width="100%" height="280" src="https://1704667c.sibforms.com/serve/MUIFAHIGZ3OxkiMQ06C2srUMjy1t9JL2EmD4xXBiwruBV3fE_1mWjUKvt7V3C6gZrNpn3E12AF1z4yjaL8iCl4L7bdN68Eg2FC2UprYWySnJCvFLx6PGCSYlJTaHGBR-0-4ec9LjAZ9fuXgpzLwfCIRytCf0T_Szj1A1RFUjEM3zFVDYzOFMZNx9-QJEDBQabsLhSNy24AUK8YMRVg==" frameborder="0" scrolling="auto" allowfullscreen style="border:none;max-width:100%;"></iframe>
+  <input class="modal-input" id="m-name" type="text" placeholder="Ton prénom">
+  <input class="modal-input" id="m-email" type="email" placeholder="Ton adresse email">
+  <button class="modal-submit" id="modal-submit-btn" onclick="()">Réserver ma place →</button>
+  <div class="modal-note">🔒 Tes données restent privées. On te contacte uniquement pour l'accès bêta.</div>
   <div class="modal-or">— ou —</div>
   <button class="btn-try-app" onclick="closeModal(); startApp(event)">Tester le prototype maintenant →</button>
 </div>
-    <div class="modal-success-view" id="modal-success-view">
-      <div class="msi">🌿</div>
-      <h3>Tu es sur la liste !</h3>
       <p>On te contactera en premier dès l'ouverture de la bêta. En attendant, tu peux tester le prototype.</p>
       <button class="btn-try-app" style="margin-top:1.25rem" onclick="closeModal(); startApp(event)">Tester le prototype →</button>
     </div>
@@ -1670,15 +1670,29 @@ async function submitModal() {
   const name = document.getElementById('m-name').value.trim();
   const email = document.getElementById('m-email').value.trim();
   if(!name || !email) { alert('Merci de remplir ton prénom et ton email 🙏'); return; }
+  const btn = document.getElementById('modal-submit-btn');
+  btn.textContent = 'Inscription en cours…';
+  btn.disabled = true;
   try {
-    await fetch('https://api.brevo.com/v3/contacts', {
+    const res = await fetch('/api/subscribe', {
       method: 'POST',
-      headers: {'Content-Type':'application/json','api-key':'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'},
-      body: JSON.stringify({email:email,attributes:{PRENOM:name},listIds:[2],updateEnabled:true})
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({name, email})
     });
-  } catch(e) { console.log(e); }
-  document.getElementById('modal-form-view').style.display='none';
-  document.getElementById('modal-success-view').style.display='block';
+    const data = await res.json();
+    if(data.success) {
+      document.getElementById('modal-form-view').style.display='none';
+      document.getElementById('modal-success-view').style.display='block';
+    } else {
+      alert('Une erreur est survenue. Réessaie !');
+      btn.textContent = 'Réserver ma place →';
+      btn.disabled = false;
+    }
+  } catch(e) {
+    alert('Une erreur est survenue. Réessaie !');
+    btn.textContent = 'Réserver ma place →';
+    btn.disabled = false;
+  }
 }
 
 // ============ SCROLL REVEAL ============
